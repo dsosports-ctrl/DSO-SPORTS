@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSO Sports Organisation - Sports Academy Management System</title>
+  
+  <!-- External Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              950: '#060B18',
+              900: '#0B132B',
+              850: '#111C3D',
+              800: '#1C2541',
+              700: '#2A375E',
+              600: '#3D4F85'
+            },
+            electric: {
+              400: '#38BDF8',
+              500: '#00A8FF',
+              600: '#0284C7',
+              glow: 'rgba(0, 168, 255, 0.35)'
+            },
+            brandOrange: {
+              400: '#FB923C',
+              500: '#FF6B35',
+              600: '#EA580C',
+              glow: 'rgba(255, 107, 53, 0.35)'
+            }
+          },
+          boxShadow: {
+            'glow-electric': '0 0 25px -5px rgba(0, 168, 255, 0.4)',
+            'glow-orange': '0 0 25px -5px rgba(255, 107, 53, 0.4)',
+            'card-3d': '0 10px 30px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-navy-950 text-slate-100 min-h-screen flex antialiased select-none selection:bg-electric-500 selection:text-white">
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="mobileBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+  <!-- Left Sidebar (Clean Navigation without Numbering) -->
+  <aside id="mainSidebar" class="fixed top-0 bottom-0 left-0 w-72 bg-navy-900 border-r border-slate-800/80 z-50 flex flex-col transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+    
+    <!-- Branding Header -->
+    <div class="h-20 flex items-center justify-between px-5 border-b border-slate-800/80 bg-navy-950/40">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('dashboard')">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brandOrange-500 via-electric-500 to-amber-400 p-[2px] shadow-glow-electric">
+          <div class="w-full h-full bg-navy-900 rounded-[10px] flex items-center justify-center font-extrabold text-white text-xl heading-font tracking-wider">
+            <span class="text-brandOrange-500">D</span><span class="text-electric-500">S</span><span>O</span>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight heading-font text-white leading-tight">DSO SPORTS</h1>
+          <p class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Sports Organisation</p>
+        </div>
+      </div>
+      <button onclick="toggleSidebar()" class="p-1.5 text-slate-400 hover:text-white lg:hidden rounded-lg hover:bg-slate-800">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Active Session Tag -->
+    <div class="px-5 py-2.5 bg-slate-900/60 border-b border-slate-800/50 flex items-center justify-between text-xs text-slate-400">
+      <span class="flex items-center gap-1.5 font-medium">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        Session: 2026 Active
+      </span>
+      <span class="bg-brandOrange-500/20 text-brandOrange-400 text-[10px] px-2 py-0.5 rounded-full font-bold">ADMIN PRO</span>
+    </div>
+
+    <!-- Clean Sidebar Navigation Links (WITHOUT NUMBERING) -->
+    <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 text-sm font-medium">
+      <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group menu-active">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 text-electric-400"></i>
+        <span>Dashboard</span>
+      </button>
+
+      <button onclick="navigateTo('registration')" id="nav-registration" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="user-plus" class="w-4 h-4 text-brandOrange-400"></i>
+        <span>Registration</span>
+      </button>
+
+      <button onclick="navigateTo('students')" id="nav-students" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
+        <span>Students</span>
+        <span class="ml-auto bg-slate-800 text-[11px] px-2 py-0.5 rounded-full text-slate-400" id="sidebarStudentCount">20</span>
+      </button>
+
+      <button onclick="navigateTo('fees')" id="nav-fees" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="indian-rupee" class="w-4 h-4 text-emerald-400"></i>
+        <span>Fees</span>
+      </button>
+
+      <button onclick="navigateTo('attendance')" id="nav-attendance" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="calendar-check-2" class="w-4 h-4 text-purple-400"></i>
+        <span>Attendance</span>
+      </button>
+
+      <button onclick="navigateTo('batches')" id="nav-batches" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="layers" class="w-4 h-4 text-yellow-400"></i>
+        <span>Batches</span>
+      </button>
+
+      <button onclick="navigateTo('activities')" id="nav-activities" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="medal" class="w-4 h-4 text-pink-400"></i>
+        <span>Activities</span>
+      </button>
+
+      <button onclick="navigateTo('gallery')" id="nav-gallery" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="image" class="w-4 h-4 text-indigo-400"></i>
+        <span>Gallery</span>
+      </button>
+
+      <button onclick="navigateTo('events')" id="nav-events" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="calendar-days" class="w-4 h-4 text-red-400"></i>
+        <span>Events</span>
+      </button>
+
+      <button onclick="navigateTo('weeklyTest')" id="nav-weeklyTest" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="clipboard-check" class="w-4 h-4 text-teal-400"></i>
+        <span>Weekly Test</span>
+      </button>
+
+      <button onclick="navigateTo('syllabus')" id="nav-syllabus" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="book-open" class="w-4 h-4 text-lime-400"></i>
+        <span>Syllabus</span>
+      </button>
+
+      <!-- Combined Single Results Item -->
+      <button onclick="navigateTo('results')" id="nav-results" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="trophy" class="w-4 h-4 text-amber-300"></i>
+        <span>Results</span>
+        <span class="ml-auto bg-amber-400/20 text-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded">25-27</span>
+      </button>
+
+      <button onclick="navigateTo('stopwatch')" id="nav-stopwatch" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="timer" class="w-4 h-4 text-emerald-400"></i>
+        <span>Stopwatch</span>
+      </button>
+
+      <button onclick="navigateTo('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-400"></i>
+        <span>Reports</span>
+      </button>
+
+      <button onclick="navigateTo('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition group">
+        <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Admin Footer with Rakesh Budhwar -->
+    <div class="p-3.5 border-t border-slate-800/80 bg-navy-950/60">
+      <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div class="relative">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80" alt="Rakesh Budhwar" class="w-10 h-10 rounded-lg object-cover ring-2 ring-electric-500/50" />
+          <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-navy-900 rounded-full"></span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-white truncate" id="sidebarDirectorName">Rakesh Budhwar</p>
+          <p class="text-[11px] text-slate-400 truncate">Head Sports Director</p>
+        </div>
+        <button onclick="showToast('Director Profile Verified - Rakesh Budhwar')" class="text-slate-400 hover:text-brandOrange-400" title="Verified Director">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Body Wrapper -->
+  <div class="lg:pl-72 flex-1 flex flex-col min-h-screen">
+    
+    <!-- Top Header (Removed HQ Delhi-NCR & DSO-2026 as requested) -->
+    <header class="h-20 bg-navy-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-8">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-400">
+          <span class="text-slate-200 font-bold heading-font uppercase tracking-wide">DSO Portal</span>
+          <span>/</span>
+          <span id="breadcrumbCurrent" class="text-electric-400 capitalize font-bold">Dashboard</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="relative w-64 md:w-96 hidden md:block">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input type="text" id="globalSearchInput" oninput="handleGlobalSearch(this.value)" placeholder="Search student, reg no, activity or fees..." class="w-full bg-navy-950/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-electric-500 transition"/>
+      </div>
+
+      <!-- Header Actions (Cleaned up right side) -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300 font-mono">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-brandOrange-500"></i>
+          <span id="liveClockDisplay">--:--:--</span>
+        </div>
+
+        <button onclick="openRegistrationModal()" class="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-brandOrange-500 to-amber-500 hover:from-brandOrange-600 hover:to-amber-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-glow-orange transition">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>New Admission</span>
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button onclick="toggleNotificationPopup()" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition relative">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-brandOrange-500 rounded-full animate-ping"></span>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-brandOrange-500 rounded-full"></span>
+          </button>
+          
+          <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-navy-900 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-white">Academy Alerts</h4>
+              <span class="text-[10px] bg-electric-500/20 text-electric-400 px-2 py-0.5 rounded-full font-bold">3 New</span>
+            </div>
+            <div class="mt-3 space-y-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800 transition">
+                <p class="font-semibold text-slate-200">Karate Belt Grading Test</p>
+                <p class="text-slate-400 text-[11px]">Scheduled for this Saturday 5:00 PM</p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800 transition">
+                <p class="font-semibold text-slate-200">Fee Reminder Notice</p>
+                <p class="text-slate-400 text-[11px]">Pending receipts ready for follow up</p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800 transition">
+                <p class="font-semibold text-slate-200">State Championship Trials</p>
+                <p class="text-slate-400 text-[11px]">5 DSO athletes qualified for finals</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-8">
+      
+      <!-- ==================== 1. DASHBOARD VIEW (Attractive & Enhanced) ==================== -->
+      <section id="view-dashboard" class="space-y-8 block">
+        <!-- Hero Banner with Dynamic Gradient Lights -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-navy-900 via-navy-850 to-navy-900 border border-slate-800 p-6 sm:p-8 shadow-card-3d">
+          <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-electric-500/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute right-1/4 -top-10 w-64 h-64 bg-brandOrange-500/15 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="space-y-3 max-w-2xl">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-electric-500/15 border border-electric-500/30 text-electric-400 text-xs font-bold tracking-wide">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+                PREMIUM ATHLETIC DEVELOPMENT SYSTEM &bull; DIRECTOR: RAKESH BUDHWAR
+              </div>
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight heading-font">
+                Empowering India's Next Generation Champions
+              </h2>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                Welcome to DSO Sports Organisation administrative hub. Oversee 20+ active student athletes, fee realizations at ₹2,000/mo, biometric attendance, weekly fitness benchmarking, and multi-year championship records (2025, 2026 & 2027).
+              </p>
+              
+              <div class="flex flex-wrap gap-2 pt-2">
+                <span class="px-3 py-1 rounded-lg bg-navy-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Yoga & Asana</span>
+                <span class="px-3 py-1 rounded-lg bg-navy-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Karate-Do Martial Arts</span>
+                <span class="px-3 py-1 rounded-lg bg-navy-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-electric-400"></span>Artistic Gymnastics</span>
+                <span class="px-3 py-1 rounded-lg bg-navy-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Fitness & Conditioning</span>
+                <span class="px-3 py-1 rounded-lg bg-navy-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-purple-400"></span>Speed Skipping</span>
+              </div>
+            </div>
+
+            <!-- Fast Action Hub -->
+            <div class="glass-panel p-5 rounded-2xl flex flex-col gap-2.5 min-w-[270px] border border-slate-700 shadow-card-3d">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Fast Execution Hub</span>
+              <button onclick="navigateTo('registration')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-electric-500/20 hover:bg-electric-500/30 text-electric-300 border border-electric-500/30 text-xs font-bold transition">
+                <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i> Add Student</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="navigateTo('fees'); openCollectFeeModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition">
+                <span class="flex items-center gap-2"><i data-lucide="indian-rupee" class="w-4 h-4"></i> Collect Fees</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="navigateTo('attendance')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-brandOrange-500/20 hover:bg-brandOrange-500/30 text-brandOrange-300 border border-brandOrange-500/30 text-xs font-bold transition">
+                <span class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Mark Attendance</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="navigateTo('results')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-bold transition">
+                <span class="flex items-center gap-2"><i data-lucide="award" class="w-4 h-4"></i> Tournament Results</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 Metric Summary Cards with Glowing Containers -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-electric-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Enrolled</span>
+              <div class="w-10 h-10 rounded-xl bg-electric-500/15 flex items-center justify-center text-electric-400 group-hover:scale-110 transition shadow-glow-electric">
+                <i data-lucide="users" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font" id="kpiTotalStudents">20</h3>
+              <p class="text-xs text-emerald-400 font-medium flex items-center gap-1 mt-1">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Expanded Roster Active
+              </p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Students</span>
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font" id="kpiActiveStudents">20</h3>
+              <p class="text-xs text-slate-400 font-medium flex items-center gap-1 mt-1">100% active participants</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-brandOrange-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today's Attendance</span>
+              <div class="w-10 h-10 rounded-xl bg-brandOrange-500/15 flex items-center justify-center text-brandOrange-400 group-hover:scale-110 transition shadow-glow-orange">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font" id="kpiTodayAttendance">18 <span class="text-sm font-normal text-slate-400">/ 20</span></h3>
+              <p class="text-xs text-emerald-400 font-medium flex items-center gap-1 mt-1">90.0% present today</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Fees Realized</span>
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition">
+                <i data-lucide="indian-rupee" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-emerald-400 heading-font" id="kpiTotalFees">₹32,000</h3>
+              <p class="text-xs text-slate-400 font-medium flex items-center gap-1 mt-1">October 2026 Cycle</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-red-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Dues</span>
+              <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 group-hover:scale-110 transition">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-red-400 heading-font" id="kpiPendingCount">4 students</h3>
+              <p class="text-xs text-slate-400 font-medium flex items-center gap-1 mt-1">₹8,000 follow-up balance</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-cyan-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sports Disciplines</span>
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font">6 Streams</h3>
+              <p class="text-xs text-slate-400 font-medium flex items-center gap-1 mt-1">Yoga, Karate, Gym, Boxing...</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-purple-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Championship Medals</span>
+              <div class="w-10 h-10 rounded-xl bg-purple-500/15 flex items-center justify-center text-purple-400 group-hover:scale-110 transition">
+                <i data-lucide="trophy" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font">18 Medals</h3>
+              <p class="text-xs text-amber-400 font-medium flex items-center gap-1 mt-1">2025 & 2026 Tournaments</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl relative overflow-hidden group hover:border-yellow-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Training Shifts</span>
+              <div class="w-10 h-10 rounded-xl bg-yellow-500/15 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition">
+                <i data-lucide="clock-3" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-3xl font-extrabold text-white heading-font">3 Batches</h3>
+              <p class="text-xs text-slate-400 font-medium flex items-center gap-1 mt-1">Morning, 5-6 PM & 6-7 PM</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Shift Status Widget & Star Champions Showcase -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Live Batch Shift Indicator -->
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="text-xs font-bold text-white uppercase flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> Live Training Shift
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">ONGOING NOW</span>
+              </div>
+              <div class="my-4 space-y-2">
+                <h4 class="text-lg font-bold text-white heading-font">Evening Batch (5:00 PM – 6:00 PM)</h4>
+                <p class="text-xs text-slate-300">Curriculum: Yogasana Core Hold & Artistic Gymnastics Flexibility Drills.</p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 text-xs space-y-1">
+                  <div class="flex justify-between"><span class="text-slate-400">Head Coach:</span><span class="font-bold text-white">Acharya Dev & Coach Vikram</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Athletes Checked-In:</span><span class="font-bold text-electric-400">11 Students</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Court / Dojang:</span><span class="font-bold text-slate-200">Main Arena (Mat 1 & 2)</span></div>
+                </div>
+              </div>
+            </div>
+            <button onclick="navigateTo('attendance')" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">
+              View Shift Attendance Sheet &rarr;
+            </button>
+          </div>
+
+          <!-- Star Champions of the Month -->
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 lg:col-span-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Star Champions of the Month</h4>
+              </div>
+              <button onclick="navigateTo('results')" class="text-xs text-electric-400 hover:text-white font-semibold">View All Medals &rarr;</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-3">
+              <div class="p-3.5 rounded-xl bg-navy-950 border border-amber-500/30 text-center space-y-2">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120" class="w-12 h-12 rounded-full mx-auto object-cover ring-2 ring-amber-400"/>
+                <div>
+                  <h5 class="font-bold text-white text-xs">Ananya Verma</h5>
+                  <span class="text-[10px] text-amber-400 font-bold block">🥇 Gold Medal - Karate Kumite</span>
+                  <span class="text-[10px] text-slate-400">Delhi State Open 2026</span>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-navy-950 border border-electric-500/30 text-center space-y-2">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120" class="w-12 h-12 rounded-full mx-auto object-cover ring-2 ring-electric-400"/>
+                <div>
+                  <h5 class="font-bold text-white text-xs">Mehar Aneja</h5>
+                  <span class="text-[10px] text-electric-400 font-bold block">🥇 1st Place - Yogasana</span>
+                  <span class="text-[10px] text-slate-400">Artistic Solo 8.95 pts</span>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-navy-950 border border-purple-500/30 text-center space-y-2">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120" class="w-12 h-12 rounded-full mx-auto object-cover ring-2 ring-purple-400"/>
+                <div>
+                  <h5 class="font-bold text-white text-xs">Vivaan Kumar</h5>
+                  <span class="text-[10px] text-purple-400 font-bold block">🥈 Silver Medal - Floor Vault</span>
+                  <span class="text-[10px] text-slate-400">North Zone Gymnastics</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-400 pt-1">
+              <span>Supervised by: <strong>Director Rakesh Budhwar</strong></span>
+              <span class="text-emerald-400 font-semibold">100% Drug-Free Fair Play Certified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="glass-panel p-5 rounded-2xl lg:col-span-2 border border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="text-sm font-bold text-white uppercase tracking-wider">Monthly Fee Collections (INR)</h4>
+                <p class="text-xs text-slate-400">Total fees realized across 2026 seasons</p>
+              </div>
+              <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">₹2,000 / Student</span>
+            </div>
+            <div class="h-64">
+              <canvas id="feeCollectionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-bold text-white uppercase tracking-wider">Activity Enrollment</h4>
+              <i data-lucide="pie-chart" class="w-4 h-4 text-electric-400"></i>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Student breakdown by specialized discipline</p>
+            <div class="h-56 relative flex-1">
+              <canvas id="activityDistributionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Tables: Recent Registrations & Pending Fees -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="user-check" class="w-4 h-4 text-electric-400"></i>
+                <h4 class="text-sm font-bold text-white uppercase tracking-wider">Recent Registrations</h4>
+              </div>
+              <button onclick="navigateTo('students')" class="text-xs text-electric-400 hover:text-electric-300 font-semibold">View All &rarr;</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-navy-950/60 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th class="py-2.5 px-3">Reg ID</th>
+                    <th class="py-2.5 px-3">Student Name</th>
+                    <th class="py-2.5 px-3">Activity</th>
+                    <th class="py-2.5 px-3">Batch</th>
+                    <th class="py-2.5 px-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentRegBody" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-brandOrange-500"></i>
+                <h4 class="text-sm font-bold text-white uppercase tracking-wider">Overdue Fees Reminder (₹2,000)</h4>
+              </div>
+              <button onclick="navigateTo('fees')" class="text-xs text-brandOrange-400 hover:text-brandOrange-300 font-semibold">Manage &rarr;</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-navy-950/60 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th class="py-2.5 px-3">Student</th>
+                    <th class="py-2.5 px-3">Month</th>
+                    <th class="py-2.5 px-3">Amount Due</th>
+                    <th class="py-2.5 px-3">Status</th>
+                    <th class="py-2.5 px-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardPendingFeesBody" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 2. REGISTRATION VIEW ==================== -->
+      <section id="view-registration" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="user-plus" class="w-6 h-6 text-brandOrange-500"></i> Student Admission Registration
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Register new student candidate into the DSO sports database.</p>
+          </div>
+          <button onclick="navigateTo('students')" class="inline-flex items-center gap-2 bg-navy-800 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 border border-slate-700">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Student Directory
+          </button>
+        </div>
+
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 max-w-5xl mx-auto shadow-card-3d">
+          <form id="registrationForm" onsubmit="handleRegistrationSubmit(event)" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Registration ID</label>
+                <input type="text" id="regFormId" readonly class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-electric-400 font-mono font-bold focus:outline-none"/>
+                <p class="text-[10px] text-slate-500 mt-1">Auto-generated chronological identifier</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Student Full Name *</label>
+                <input type="text" id="regFormName" required placeholder="e.g. Aarav Sharma" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Date of Birth *</label>
+                <input type="date" id="regFormDob" required value="2012-05-15" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Father's Name *</label>
+                <input type="text" id="regFormFather" required placeholder="e.g. Manoj Sharma" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mother's Name *</label>
+                <input type="text" id="regFormMother" required placeholder="e.g. Sunita Sharma" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Gender *</label>
+                <select id="regFormGender" required class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mobile Number *</label>
+                <input type="tel" id="regFormMobile" required placeholder="9876543210" pattern="[0-9]{10}" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">WhatsApp Number</label>
+                <input type="tel" id="regFormWhatsapp" placeholder="9876543210" pattern="[0-9]{10}" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Selected Activity *</label>
+                <select id="regFormActivity" required class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500">
+                  <option value="Yoga">Yoga & Asana</option>
+                  <option value="Karate">Karate & Martial Arts</option>
+                  <option value="Gymnastics">Gymnastics</option>
+                  <option value="Fitness">Fitness & Conditioning</option>
+                  <option value="Skipping">Rope Skipping Speed</option>
+                  <option value="Self Defense">Self Defense</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Selected Batch *</label>
+                <select id="regFormBatch" required class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500">
+                  <option value="5–6 PM">Evening Batch (5:00 PM – 6:00 PM)</option>
+                  <option value="6–7 PM">Evening Batch (6:00 PM – 7:00 PM)</option>
+                  <option value="6–7 AM">Morning Elite (6:00 AM – 7:00 AM)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Monthly Fee [Standard Rate]</label>
+                <input type="text" id="regFormMonthlyFee" readonly value="₹2,000" class="w-full bg-navy-950 border border-emerald-500/50 rounded-xl px-3.5 py-2.5 text-xs text-emerald-400 font-bold focus:outline-none"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Admission Date *</label>
+                <input type="date" id="regFormAdmDate" required value="2026-10-21" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500"/>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Student Photo Avatar</label>
+                <select id="regFormAvatar" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-electric-500">
+                  <option value="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150">Avatar 1 (Male Youth)</option>
+                  <option value="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150">Avatar 2 (Female Youth)</option>
+                  <option value="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150">Avatar 3 (Junior Athlete)</option>
+                  <option value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150">Avatar 4 (Junior Champion)</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Residential Address *</label>
+                <input type="text" id="regFormAddress" required placeholder="Complete home address" class="w-full bg-navy-950/70 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-electric-500"/>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              <button type="reset" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+                Reset Form
+              </button>
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brandOrange-500 to-amber-500 hover:from-brandOrange-600 hover:to-amber-600 text-xs font-bold text-white shadow-glow-orange transition flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4"></i> Complete Student Registration
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==================== 3. STUDENTS VIEW (Expanded 20+ records) ==================== -->
+      <section id="view-students" class="space-y-6 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="users" class="w-6 h-6 text-cyan-400"></i> Student Directory Management (20 Enrolled)
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Search, filter, view comprehensive profiles, and export player files.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="exportStudentsCSV()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700">
+              <i data-lucide="file-down" class="w-4 h-4 text-emerald-400"></i> Export CSV
+            </button>
+            <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700">
+              <i data-lucide="printer" class="w-4 h-4 text-electric-400"></i> Print Table
+            </button>
+            <button onclick="navigateTo('registration')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-xs font-bold text-white shadow-glow-orange">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add Student
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div class="relative w-full md:w-80">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="studentsFilterSearch" oninput="renderStudentsTable()" placeholder="Search by name, ID or mobile..." class="w-full bg-navy-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-electric-500"/>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <select id="studentsFilterActivity" onchange="renderStudentsTable()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Activities</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Karate">Karate</option>
+              <option value="Gymnastics">Gymnastics</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Skipping">Skipping</option>
+              <option value="Self Defense">Self Defense</option>
+            </select>
+
+            <select id="studentsFilterBatch" onchange="renderStudentsTable()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Batches</option>
+              <option value="5–6 PM">5–6 PM</option>
+              <option value="6–7 PM">6–7 PM</option>
+              <option value="6–7 AM">6–7 AM</option>
+            </select>
+
+            <select id="studentsFilterFee" onchange="renderStudentsTable()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Fee Status</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Partial">Partial</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-card-3d">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-navy-950/80 text-slate-400 border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="py-3 px-4">Reg ID</th>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Parent Name</th>
+                  <th class="py-3 px-4">Mobile</th>
+                  <th class="py-3 px-4">Activity</th>
+                  <th class="py-3 px-4">Batch</th>
+                  <th class="py-3 px-4">Adm Date</th>
+                  <th class="py-3 px-4">Fee Status</th>
+                  <th class="py-3 px-4">Attendance %</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+          <div class="p-3.5 bg-navy-950/60 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span id="studentTableCountDisplay">Showing 20 of 20 athletes</span>
+            <div class="flex gap-1 text-[11px]">
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Page 1 of 1</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 4. FEES VIEW (Renamed to Fees) ==================== -->
+      <section id="view-fees" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="indian-rupee" class="w-6 h-6 text-emerald-400"></i> Fees
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Monitor fee collection cycles, outstanding dues, and generate receipts.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openCollectFeeModal()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Collect Fee
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-emerald-500">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Collected This Month</span>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1 heading-font" id="feePageTotalPaid">₹32,000</h3>
+            <p class="text-[11px] text-slate-400 mt-1">From registered cohort of 20 athletes</p>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-red-500">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Pending Dues</span>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-red-400 mt-1 heading-font" id="feePageTotalPending">₹8,000</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Pending follow-up actions</p>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-electric-500">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Standard Monthly Fee Rate</span>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-white mt-1 heading-font">₹2,000</h3>
+            <p class="text-[11px] text-electric-400 mt-1">Fixed academy fee structure</p>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-card-3d">
+          <div class="p-4 bg-navy-950/60 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="receipt" class="w-4 h-4 text-brandOrange-500"></i>
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Student Ledger Records (October 2026)</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Filter Status:</span>
+              <select id="feesTableFilter" onchange="renderFeesTable()" class="bg-navy-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200">
+                <option value="ALL">All Records</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Partial">Partial</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-navy-950/90 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Receipt #</th>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Month</th>
+                  <th class="py-3 px-4">Monthly Fee</th>
+                  <th class="py-3 px-4">Paid</th>
+                  <th class="py-3 px-4">Balance</th>
+                  <th class="py-3 px-4">Method</th>
+                  <th class="py-3 px-4">Date</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="feesTableBody" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 5. ATTENDANCE VIEW ==================== -->
+      <section id="view-attendance" class="space-y-6 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="calendar-check-2" class="w-6 h-6 text-purple-400"></i> Daily Attendance Management
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Track attendance and alert on percentages below 75%.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="markAllAttendance('Present')" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition">
+              Mark All Present
+            </button>
+            <button onclick="markAllAttendance('Absent')" class="px-3 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-xs font-bold transition">
+              Mark All Absent
+            </button>
+            <button onclick="saveAttendanceSession()" class="px-4 py-2 rounded-xl bg-electric-500 hover:bg-electric-600 text-white text-xs font-bold shadow-glow-electric transition flex items-center gap-1.5">
+              <i data-lucide="save" class="w-4 h-4"></i> Save Sheet
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Attendance Date</label>
+            <input type="date" id="attendanceDatePicker" value="2026-10-21" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-electric-500"/>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Filter Batch</label>
+            <select id="attendanceBatchFilter" onchange="renderAttendanceTable()" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+              <option value="ALL">All Batches</option>
+              <option value="5–6 PM">5–6 PM Evening</option>
+              <option value="6–7 PM">6–7 PM Evening</option>
+              <option value="6–7 AM">6–7 AM Morning</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Filter Activity</label>
+            <select id="attendanceActivityFilter" onchange="renderAttendanceTable()" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+              <option value="ALL">All Disciplines</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Karate">Karate</option>
+              <option value="Gymnastics">Gymnastics</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Skipping">Skipping</option>
+              <option value="Self Defense">Self Defense</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-card-3d">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-navy-950/80 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Activity & Batch</th>
+                  <th class="py-3 px-4 text-center">Status (P / A / L)</th>
+                  <th class="py-3 px-4">Overall %</th>
+                  <th class="py-3 px-4">Compliance Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 6. BATCHES VIEW ==================== -->
+      <section id="view-batches" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="layers" class="w-6 h-6 text-yellow-400"></i> Academy Batches & Timings
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Manage class capacities, assigned instructors, and workout slots.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 relative group hover:border-yellow-400/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-full bg-yellow-400/15 text-yellow-400 text-[11px] font-bold">EVENING SHIFT</span>
+              <span class="text-xs text-slate-400">Capacity: 40 Students</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-3 heading-font">Evening Batch A (5–6 PM)</h3>
+            <p class="text-xs text-slate-400 mt-1">Yoga, Gymnastics & Junior skipping athletes slot.</p>
+            <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-300">
+                <span>Assigned Coach:</span>
+                <span class="font-bold text-white">Coach Vikram Rathore</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Active Enrolled:</span>
+                <span class="font-bold text-electric-400" id="batchCountA">10 Students</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 mt-2">
+                <div class="bg-yellow-400 h-2 rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 relative group hover:border-electric-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-full bg-electric-500/15 text-electric-400 text-[11px] font-bold">EVENING SHIFT</span>
+              <span class="text-xs text-slate-400">Capacity: 40 Students</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-3 heading-font">Evening Batch B (6–7 PM)</h3>
+            <p class="text-xs text-slate-400 mt-1">Advanced Karate Kumite, high intensity conditioning, and sparring.</p>
+            <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-300">
+                <span>Assigned Coach:</span>
+                <span class="font-bold text-white">Sensei Arvind Mehra</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Active Enrolled:</span>
+                <span class="font-bold text-electric-400" id="batchCountB">7 Students</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 mt-2">
+                <div class="bg-electric-500 h-2 rounded-full" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 relative group hover:border-emerald-500/50 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold">MORNING PRO</span>
+              <span class="text-xs text-slate-400">Capacity: 25 Athletes</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-3 heading-font">Morning Conditioning (6–7 AM)</h3>
+            <p class="text-xs text-slate-400 mt-1">Cross-training, track speed endurance and flexibility drills.</p>
+            <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-300">
+                <span>Assigned Coach:</span>
+                <span class="font-bold text-white">Trainer Priya Das</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Active Enrolled:</span>
+                <span class="font-bold text-emerald-400">3 Students</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 mt-2">
+                <div class="bg-emerald-500 h-2 rounded-full" style="width: 48%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 7. ACTIVITIES VIEW (Substantially Enhanced Data) ==================== -->
+      <section id="view-activities" class="space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="medal" class="w-6 h-6 text-pink-400"></i> Academy Sports Disciplines & Curricula
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Professional high-performance training wings under DSO Sports Organisation.</p>
+          </div>
+          <button onclick="navigateTo('registration')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brandOrange-500 to-amber-500 hover:from-brandOrange-600 hover:to-amber-600 text-white font-bold text-xs shadow-glow-orange transition">
+            + Enroll In Discipline
+          </button>
+        </div>
+
+        <!-- 6 High-Performance Activity Cards with Deep Data -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- 1. Yoga & Asana -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-amber-400/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&auto=format&fit=crop&q=80" alt="Yoga" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-amber-400 text-xs px-3 py-1 rounded-full font-bold border border-amber-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-amber-500/20 text-amber-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">OLYMPIC / FEDERATION SYLLABUS</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Yoga & Traditional Asana Championship</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Focuses on traditional Surya Namaskar, advanced spinal extensions, core balancing, pranayama, and 10-asana routine timing benchmarks (151s-190s).
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Head Coach:</span><span class="font-bold text-white">Acharya Dev (M.Sc Yoga, 15 Yrs Exp)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">5:00 PM – 6:00 PM (Daily)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">High-density Yoga Mats, Wooden Blocks, Straps</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Belt / Level:</span><span class="text-emerald-400 font-semibold">Tier 1 to Tier 3 State Level</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs border border-amber-500/30 transition">
+                Enroll In Yoga &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Karate-Do -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-red-400/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1555597673-b21d5c935865?w=600&auto=format&fit=crop&q=80" alt="Karate" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-red-400 text-xs px-3 py-1 rounded-full font-bold border border-red-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-red-500/20 text-red-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">SHOTOKAN MARTIAL ARTS</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Karate-Do & Combat Kumite</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  International Shotokan syllabus covering Kihon fundamentals, Heian Kata forms, full-contact Kumite point sparring, and official Kyu belt examinations.
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Chief Instructor:</span><span class="font-bold text-white">Sensei Arvind Mehra (5th Dan Black Belt)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">6:00 PM – 7:00 PM (Mon-Sat)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">Tatami Mats, Focus Pads, Chest Guards</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Grading System:</span><span class="text-red-400 font-semibold">White to Black Belt Certified</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold text-xs border border-red-500/30 transition">
+                Enroll In Karate &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Gymnastics -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-cyan-400/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&auto=format&fit=crop&q=80" alt="Gymnastics" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-cyan-400 text-xs px-3 py-1 rounded-full font-bold border border-cyan-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-cyan-500/20 text-cyan-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">ARTISTIC & ACROBATIC</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Artistic Gymnastics & Tumbling</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Dynamic floor acrobatics, cartwheels, front/back handsprings, roundoffs, balancing beams, and air track tumbling routines with foam crash safety.
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Senior Coach:</span><span class="font-bold text-white">Coach Vikram Rathore (NIS Certified)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">5:00 PM – 6:00 PM</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">Springboard, Inflatable Air Track, Foam Pit</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Age Eligibility:</span><span class="text-cyan-400 font-semibold">5 to 18 Years</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-xs border border-cyan-500/30 transition">
+                Enroll In Gymnastics &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Youth Fitness -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-emerald-400/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop&q=80" alt="Fitness" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-emerald-400 text-xs px-3 py-1 rounded-full font-bold border border-emerald-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-emerald-500/20 text-emerald-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">ATHLETIC STRENGTH</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Youth Fitness & High-Performance Conditioning</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Scientific motor-ability development, agility ladder drills, core endurance, speed sprint resistance, posture correction, and bodyweight power training.
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Conditioning Coach:</span><span class="font-bold text-white">Coach Priya Das (Ex-National Athlete)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">6:00 AM – 7:00 AM & 6:00 PM</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">Medicine Balls, Cones, Resistance Bands</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Test Assessment:</span><span class="text-emerald-400 font-semibold">Weekly Biometric Index</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs border border-emerald-500/30 transition">
+                Enroll In Fitness &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 5. Speed Skipping -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-purple-400/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80" alt="Skipping" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-purple-400 text-xs px-3 py-1 rounded-full font-bold border border-purple-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-purple-500/20 text-purple-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">SPEED ROPE SPORT</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Speed Rope Skipping & Freestyle</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Speed sprint skipping (30-second endurance sprint), double unders, crosses, multi-person double dutch routines, and national federation timing rules.
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Head Coach:</span><span class="font-bold text-white">Coach Arjun Nair (National Medalist)</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">5:00 PM – 6:00 PM</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">Bearing Speed Ropes, Beaded Freestyle Ropes</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Record Benchmark:</span><span class="text-purple-400 font-semibold">85+ Jumps in 30 Seconds</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-bold text-xs border border-purple-500/30 transition">
+                Enroll In Skipping &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 6. Self Defense -->
+          <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800 group hover:border-brandOrange-500/60 transition shadow-card-3d flex flex-col justify-between">
+            <div>
+              <div class="h-48 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=600&auto=format&fit=crop&q=80" alt="Self Defense" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent"></div>
+                <span class="absolute top-3 right-3 bg-navy-950/80 text-brandOrange-400 text-xs px-3 py-1 rounded-full font-bold border border-brandOrange-400/30">₹2,000 / mo</span>
+                <span class="absolute bottom-3 left-3 bg-brandOrange-500/20 text-brandOrange-300 text-[11px] px-2.5 py-0.5 rounded-full font-bold">URBAN PROTECTION</span>
+              </div>
+              <div class="p-5 space-y-3">
+                <h3 class="text-lg font-bold text-white heading-font">Tactical Self Defense & Anti-Bullying</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Real-world situational defense, wrist release techniques, evasion footwork, anti-choke maneuvers, tactical vocal command, and confidence empowerment.
+                </p>
+                <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5 text-[11px]">
+                  <div class="flex justify-between"><span class="text-slate-400">Senior Master:</span><span class="font-bold text-white">Sensei Arvind Mehra & Tactical Staff</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Active Batches:</span><span class="font-mono text-electric-400 font-bold">Weekend Special & Evening</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Gear Provided:</span><span class="text-slate-200">Heavy Strike Shields, Padded Headgear</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Certification:</span><span class="text-brandOrange-400 font-semibold">DSO Practical Defense Badge</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="navigateTo('registration')" class="w-full py-2.5 rounded-xl bg-brandOrange-500/20 hover:bg-brandOrange-500/30 text-brandOrange-300 font-bold text-xs border border-brandOrange-500/30 transition">
+                Enroll In Self Defense &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 8. GALLERY VIEW (Photos, Videos, News Sub-buttons + Dropdown) ==================== -->
+      <section id="view-gallery" class="space-y-6 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="image" class="w-6 h-6 text-indigo-400"></i> Academy Multimedia Gallery
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Tournament photos, training video clips, and newspaper press releases.</p>
+          </div>
+        </div>
+
+        <!-- Sub Navigation Filter Buttons + Dropdown -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          <!-- Sub Buttons: All, Photos, Videos, News -->
+          <div class="flex flex-wrap items-center gap-2" id="galleryTypeButtons">
+            <button onclick="filterGalleryType('all', this)" class="px-4 py-2 rounded-xl text-xs font-bold bg-electric-500 text-white shadow-glow-electric transition">
+              All Media
+            </button>
+            <button onclick="filterGalleryType('photo', this)" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition flex items-center gap-1.5">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i> Photos
+            </button>
+            <button onclick="filterGalleryType('video', this)" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition flex items-center gap-1.5">
+              <i data-lucide="video" class="w-3.5 h-3.5"></i> Videos
+            </button>
+            <button onclick="filterGalleryType('news', this)" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition flex items-center gap-1.5">
+              <i data-lucide="newspaper" class="w-3.5 h-3.5"></i> News & Press
+            </button>
+          </div>
+
+          <!-- Dropdown Filter: Year & Category -->
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Year:</span>
+              <select id="galleryYearFilter" onchange="applyGalleryFilters()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-electric-500 font-bold">
+                <option value="ALL">All Years</option>
+                <option value="2027">2027 (Upcoming)</option>
+                <option value="2026">2026 (Active Season)</option>
+                <option value="2025">2025 (Championship)</option>
+                <option value="2024">2024 (Archive)</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Category:</span>
+              <select id="galleryCategoryFilter" onchange="applyGalleryFilters()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-electric-500">
+                <option value="ALL">All Disciplines</option>
+                <option value="Yoga">Yoga</option>
+                <option value="Karate">Karate</option>
+                <option value="Gymnastics">Gymnastics</option>
+                <option value="Ceremony">Ceremonies</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multimedia Grid Container -->
+        <div id="galleryGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ==================== 9. EVENTS VIEW (Renamed from News & Events) ==================== -->
+      <section id="view-events" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="calendar-days" class="w-6 h-6 text-red-400"></i> Academy Events & Official Circulars
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Official championship notices, examinations, and tournament fixtures.</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 max-w-4xl">
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-brandOrange-500 flex flex-col sm:flex-row justify-between gap-4">
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold text-brandOrange-400 tracking-wider">Tournament Notice • Nov 2026</span>
+              <h3 class="text-base font-bold text-white">Delhi State Karate Championship Nominations Open</h3>
+              <p class="text-xs text-slate-300">All registered students under yellow belt and above must submit entry forms before 15th November. Sparring gear inspection will occur on Friday.</p>
+            </div>
+            <span class="text-xs text-slate-400 whitespace-nowrap self-start">Oct 24, 2026</span>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-electric-500 flex flex-col sm:flex-row justify-between gap-4">
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold text-electric-400 tracking-wider">Examination Schedule</span>
+              <h3 class="text-base font-bold text-white">Quarterly Fitness Benchmarking & Yogasana Testing</h3>
+              <p class="text-xs text-slate-300">Fitness cards will be scored across flexibility, 100m sprint times, pushups and balancing asanas under supervision of Director Rakesh Budhwar.</p>
+            </div>
+            <span class="text-xs text-slate-400 whitespace-nowrap self-start">Oct 20, 2026</span>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col sm:flex-row justify-between gap-4">
+            <div class="space-y-1">
+              <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">State Championship 2027 Preview</span>
+              <h3 class="text-base font-bold text-white">National Games Zonal Qualifiers Registration</h3>
+              <p class="text-xs text-slate-300">Advance qualifier fixtures for the 2027 season announced. Direct selection trials for DSO medalists.</p>
+            </div>
+            <span class="text-xs text-slate-400 whitespace-nowrap self-start">Oct 15, 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 10. WEEKLY TEST VIEW ==================== -->
+      <section id="view-weeklyTest" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="clipboard-check" class="w-6 h-6 text-teal-400"></i> Weekly Athletic Fitness Testing
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Biometric fitness index and performance evaluations across batches.</p>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-card-3d">
+          <div class="p-4 bg-navy-950/60 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold uppercase text-white tracking-wider">Weekly Assessment Scorecard</span>
+            <span class="text-xs text-teal-400 font-bold">Session: Week 42 (Oct 2026)</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-navy-950/80 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Discipline</th>
+                  <th class="py-3 px-4">Pushups (1 min)</th>
+                  <th class="py-3 px-4">Flexibility Index</th>
+                  <th class="py-3 px-4">100m Sprint</th>
+                  <th class="py-3 px-4">Form Score</th>
+                  <th class="py-3 px-4">Grade</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60">
+                <tr class="hover:bg-slate-800/40">
+                  <td class="py-3 px-4 font-bold text-white">Aarav Sharma</td>
+                  <td class="py-3 px-4 text-amber-400 font-semibold">Yoga</td>
+                  <td class="py-3 px-4">32</td>
+                  <td class="py-3 px-4">9.5 / 10</td>
+                  <td class="py-3 px-4">14.2 sec</td>
+                  <td class="py-3 px-4">92%</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Grade A+</span></td>
+                </tr>
+                <tr class="hover:bg-slate-800/40">
+                  <td class="py-3 px-4 font-bold text-white">Ananya Verma</td>
+                  <td class="py-3 px-4 text-red-400 font-semibold">Karate</td>
+                  <td class="py-3 px-4">40</td>
+                  <td class="py-3 px-4">8.8 / 10</td>
+                  <td class="py-3 px-4">13.6 sec</td>
+                  <td class="py-3 px-4">95%</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Grade A+</span></td>
+                </tr>
+                <tr class="hover:bg-slate-800/40">
+                  <td class="py-3 px-4 font-bold text-white">Vivaan Kumar</td>
+                  <td class="py-3 px-4 text-cyan-400 font-semibold">Gymnastics</td>
+                  <td class="py-3 px-4">28</td>
+                  <td class="py-3 px-4">9.8 / 10</td>
+                  <td class="py-3 px-4">15.0 sec</td>
+                  <td class="py-3 px-4">88%</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-electric-500/20 text-electric-400 font-bold">Grade A</span></td>
+                </tr>
+                <tr class="hover:bg-slate-800/40">
+                  <td class="py-3 px-4 font-bold text-white">Kabir Dahiya</td>
+                  <td class="py-3 px-4 text-brandOrange-400 font-semibold">Self Defense</td>
+                  <td class="py-3 px-4">38</td>
+                  <td class="py-3 px-4">8.5 / 10</td>
+                  <td class="py-3 px-4">13.9 sec</td>
+                  <td class="py-3 px-4">90%</td>
+                  <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Grade A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 11. SYLLABUS VIEW ==================== -->
+      <section id="view-syllabus" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="book-open" class="w-6 h-6 text-lime-400"></i> Academy Curriculum & Belts
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Prescribed martial arts belts and gymnastics benchmarks.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+            <h3 class="text-base font-bold text-white heading-font text-lime-400">Karate Belt Curriculum</h3>
+            <ul class="text-xs text-slate-300 space-y-2">
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>White & Yellow Belt</span><span class="text-slate-400">Heian Shodan & Kihon</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Green & Blue Belt</span><span class="text-slate-400">Heian Nidan/Sandan</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Brown & Black Belt</span><span class="text-slate-400">Bassai Dai & Jiyu Kumite</span></li>
+            </ul>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+            <h3 class="text-base font-bold text-white heading-font text-amber-400">Yogasana Levels</h3>
+            <ul class="text-xs text-slate-300 space-y-2">
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Tier 1 (Foundation)</span><span class="text-slate-400">Surya Namaskar 12 steps</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Tier 2 (Intermediate)</span><span class="text-slate-400">Chakrasana & Sarvangasana</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Tier 3 (Championship)</span><span class="text-slate-400">Mayurasana & Natarajasana</span></li>
+            </ul>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+            <h3 class="text-base font-bold text-white heading-font text-cyan-400">Gymnastics Milestones</h3>
+            <ul class="text-xs text-slate-300 space-y-2">
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Cadet Level</span><span class="text-slate-400">Forward/Backward Rolls</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Junior Level</span><span class="text-slate-400">Cartwheels & Handsprings</span></li>
+              <li class="flex items-center justify-between p-2 rounded bg-slate-900"><span>Senior Level</span><span class="text-slate-400">Roundoff Back Tuck</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 12. UNIFIED RESULTS VIEW (With 2025, 2026, 2027 Dropdown) ==================== -->
+      <section id="view-results" class="space-y-6 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="trophy" class="w-6 h-6 text-amber-300"></i> Tournament Results & Honors
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Single unified records database with 2025, 2026 and 2027 seasons.</p>
+          </div>
+          <button onclick="exportResultsCSV()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">
+            <i data-lucide="download" class="w-4 h-4 text-electric-400"></i> Export Results CSV
+          </button>
+        </div>
+
+        <!-- Year Selector Dropdown & Filter Bar -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">Select Season / Year:</label>
+            <select id="resultsYearFilter" onchange="renderUnifiedResults()" class="bg-navy-950 border-2 border-amber-400/50 rounded-xl px-4 py-2 text-xs font-bold text-amber-300 focus:outline-none focus:border-amber-400">
+              <option value="ALL">All Seasons (2025, 2026, 2027)</option>
+              <option value="2027">Season 2027 (Upcoming / Fixtures)</option>
+              <option value="2026" selected>Season 2026 (Active Champions)</option>
+              <option value="2025">Season 2025 (Championship Archive)</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <select id="resultsCategoryFilter" onchange="renderUnifiedResults()" class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Disciplines</option>
+              <option value="Karate">Karate</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Gymnastics">Gymnastics</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Skipping">Skipping</option>
+            </select>
+
+            <input type="text" id="resultsSearchInput" oninput="renderUnifiedResults()" placeholder="Search athlete or event..." class="bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-electric-500 w-full sm:w-56"/>
+          </div>
+        </div>
+
+        <!-- Medal Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-400 text-center">
+            <span class="text-2xl">🥇</span>
+            <h4 class="text-xl font-extrabold text-white heading-font mt-1" id="medalsGoldCount">8</h4>
+            <span class="text-[11px] font-bold text-amber-400 uppercase">Gold Medals</span>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-slate-400 text-center">
+            <span class="text-2xl">🥈</span>
+            <h4 class="text-xl font-extrabold text-white heading-font mt-1" id="medalsSilverCount">6</h4>
+            <span class="text-[11px] font-bold text-slate-300 uppercase">Silver Medals</span>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-600 text-center">
+            <span class="text-2xl">🥉</span>
+            <h4 class="text-xl font-extrabold text-white heading-font mt-1" id="medalsBronzeCount">4</h4>
+            <span class="text-[11px] font-bold text-amber-500 uppercase">Bronze Medals</span>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-electric-500 text-center">
+            <span class="text-2xl">🏆</span>
+            <h4 class="text-xl font-extrabold text-white heading-font mt-1">3 Trophies</h4>
+            <span class="text-[11px] font-bold text-electric-400 uppercase">State Champions</span>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-card-3d">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-navy-950/80 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Season</th>
+                  <th class="py-3 px-4">Tournament Event</th>
+                  <th class="py-3 px-4">Student Athlete</th>
+                  <th class="py-3 px-4">Discipline</th>
+                  <th class="py-3 px-4">Position / Score</th>
+                  <th class="py-3 px-4">Medal Award</th>
+                  <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="unifiedResultsTableBody" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 13. STOPWATCH VIEW ==================== -->
+      <section id="view-stopwatch" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="timer" class="w-6 h-6 text-emerald-400"></i> Track & Sprint Precision Stopwatch
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">High-accuracy millisecond sports timer with lap-split recordings.</p>
+          </div>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 max-w-xl mx-auto flex flex-col items-center shadow-card-3d">
+          <div class="w-full text-center space-y-2">
+            <span class="text-xs font-mono uppercase tracking-widest text-slate-400">OFFICIAL DSO SPEED TRACKER</span>
+            <div id="stopwatchDisplay" class="text-5xl sm:text-7xl font-mono font-extrabold text-white tracking-wider my-6 text-center select-all">
+              00:00:00.<span class="text-3xl sm:text-4xl text-electric-400">00</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button id="swStartBtn" onclick="toggleStopwatch()" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/30 transition">
+              Start
+            </button>
+            <button id="swLapBtn" onclick="recordStopwatchLap()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs uppercase tracking-wider transition">
+              Lap Split
+            </button>
+            <button onclick="resetStopwatch()" class="px-6 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold text-xs uppercase tracking-wider border border-red-500/30 transition">
+              Reset
+            </button>
+          </div>
+
+          <div class="w-full mt-6 pt-6 border-t border-slate-800">
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Recorded Laps</span>
+              <span id="lapCountDisplay" class="text-xs text-slate-500">0 Laps</span>
+            </div>
+            <div id="stopwatchLapsList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs font-mono">
+              <p class="text-slate-500 text-center py-4">No split intervals recorded yet</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 14. REPORTS VIEW ==================== -->
+      <section id="view-reports" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-400"></i> Academy Analytics & Auditing
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Consolidated reports on collection run-rates and discipline trends.</p>
+          </div>
+          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center gap-2">
+            <i data-lucide="printer" class="w-4 h-4"></i> Print Executive Audit
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Financial Snapshot (Monthly Rate: ₹2,000)</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Total Enrolled Cohort</span>
+                <span class="text-white font-bold">20 Athletes Active</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Monthly Revenue Potential</span>
+                <span class="text-emerald-400 font-bold">₹40,000 / Month</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Current Realized Fees</span>
+                <span class="text-white font-bold">₹32,000</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Collection Efficiency</span>
+                <span class="text-emerald-400 font-bold">80.0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Training Discipline Health</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Highest Retention Activity</span>
+                <span class="text-white font-bold">Karate & Self Defense (95%)</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Average Attendance Score</span>
+                <span class="text-white font-bold">89.4% Across Shifts</span>
+              </div>
+              <div class="flex justify-between p-2 rounded bg-navy-950">
+                <span class="text-slate-400">Low Attendance (&lt;75%)</span>
+                <span class="text-red-400 font-bold">1 Student Flagged</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 15. SETTINGS VIEW ==================== -->
+      <section id="view-settings" class="space-y-6 hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white heading-font flex items-center gap-2">
+              <i data-lucide="settings" class="w-6 h-6 text-slate-400"></i> Academy System Settings
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Configure academy branch data and administrative credentials.</p>
+          </div>
+        </div>
+
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 max-w-3xl space-y-6 shadow-card-3d">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Academy Organisation Name</label>
+              <input type="text" value="DSO SPORTS ORGANISATION" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Head Sports Director</label>
+              <input type="text" id="settingDirectorInput" value="Rakesh Budhwar" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none font-bold"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Standard Monthly Fee (INR)</label>
+              <input type="text" value="₹2,000" disabled class="w-full bg-navy-950/80 border border-emerald-500/40 rounded-xl px-3.5 py-2.5 text-xs text-emerald-400 font-bold focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Primary Contact Phone</label>
+              <input type="text" value="+91 98112 23344" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none"/>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="restoreInitialDemoData()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">
+              Restore Demo State
+            </button>
+            <button onclick="saveDirectorSetting()" class="px-5 py-2 rounded-xl bg-electric-500 hover:bg-electric-600 text-xs font-bold text-white shadow-glow-electric">
+              Save Preferences
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Student Profile Modal -->
+  <div id="studentProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl">
+      <div class="p-6 bg-gradient-to-r from-navy-900 to-navy-850 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <img id="modalProfileImg" src="" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-electric-500"/>
+          <div>
+            <h3 id="modalProfileName" class="text-lg font-bold text-white heading-font">--</h3>
+            <p id="modalProfileReg" class="text-xs text-electric-400 font-mono">--</p>
+          </div>
+        </div>
+        <button onclick="closeModal('studentProfileModal')" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 rounded-xl bg-navy-950 border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase">Activity</span>
+            <span id="modalProfileActivity" class="text-white font-bold">--</span>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-950 border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase">Batch</span>
+            <span id="modalProfileBatch" class="text-white font-bold">--</span>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-950 border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase">Fee Status</span>
+            <span id="modalProfileFee" class="font-bold">--</span>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-950 border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase">Attendance</span>
+            <span id="modalProfileAtt" class="font-bold">--</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-navy-950/60 border border-slate-800 space-y-2">
+          <div class="flex justify-between"><span class="text-slate-400">Parent / Guardian:</span><span id="modalProfileParent" class="text-white font-medium">--</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Mobile Contact:</span><span id="modalProfileMobile" class="text-white font-medium font-mono">--</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Admission Date:</span><span id="modalProfileAdm" class="text-white font-medium">--</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Standard Monthly Fee:</span><span class="text-emerald-400 font-bold">₹2,000 / Month</span></div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-navy-950/60 border border-slate-800 space-y-2">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 text-electric-400">
+            <i data-lucide="activity" class="w-4 h-4"></i> Performance Report Card
+          </h4>
+          <div class="grid grid-cols-3 gap-2 text-center pt-1">
+            <div class="p-2 rounded bg-slate-900"><span class="block text-[10px] text-slate-400">Discipline</span><span class="font-bold text-white">Advanced</span></div>
+            <div class="p-2 rounded bg-slate-900"><span class="block text-[10px] text-slate-400">Fitness Test</span><span class="font-bold text-emerald-400">92/100</span></div>
+            <div class="p-2 rounded bg-slate-900"><span class="block text-[10px] text-slate-400">Next Grading</span><span class="font-bold text-amber-400">Nov 2026</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Collect Fee Modal -->
+  <div id="collectFeeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl border border-slate-700 overflow-hidden shadow-2xl">
+      <div class="p-5 bg-gradient-to-r from-navy-900 to-navy-850 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-base font-bold text-white heading-font flex items-center gap-2">
+          <i data-lucide="indian-rupee" class="w-5 h-5 text-emerald-400"></i> Fee Collection Entry (₹2,000)
+        </h3>
+        <button onclick="closeModal('collectFeeModal')" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleFeeCollectionSubmit(event)" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block font-bold uppercase tracking-wider text-slate-400 mb-1">Select Student</label>
+          <select id="feeModalStudentSelect" required class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold uppercase tracking-wider text-slate-400 mb-1">Month Cycle</label>
+            <input type="text" value="October 2026" readonly class="w-full bg-navy-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-400 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block font-bold uppercase tracking-wider text-slate-400 mb-1">Total Fee (Fixed)</label>
+            <input type="text" value="₹2,000" readonly class="w-full bg-navy-950 border border-emerald-500/40 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold uppercase tracking-wider text-slate-400 mb-1">Amount Paid (₹)</label>
+            <input type="number" id="feeModalAmountPaid" min="0" max="2000" value="2000" required class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block font-bold uppercase tracking-wider text-slate-400 mb-1">Payment Method</label>
+            <select id="feeModalMethod" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none">
+              <option value="UPI">UPI (Google Pay / PhonePe)</option>
+              <option value="Cash">Cash at Counter</option>
+              <option value="Bank Transfer">Bank Transfer / NEFT</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('collectFeeModal')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/30">
+            Generate Receipt & Record
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Printable Receipt Modal -->
+  <div id="receiptModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-navy-900 border border-slate-700 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-4 bg-navy-950 border-b border-slate-800 flex items-center justify-between">
+        <span class="text-xs font-bold text-white uppercase tracking-wider">Official Fee Invoice Voucher</span>
+        <div class="flex items-center gap-2">
+          <button onclick="printInvoice()" class="px-3 py-1 rounded-lg bg-electric-500 text-white text-xs font-bold flex items-center gap-1">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print
+          </button>
+          <button onclick="closeModal('receiptModal')" class="p-1 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="printableReceipt" class="p-6 bg-slate-900 text-slate-200 text-xs space-y-4">
+        <div class="text-center pb-3 border-b border-slate-800">
+          <h2 class="text-lg font-extrabold text-white tracking-wider heading-font">DSO SPORTS ORGANISATION</h2>
+          <p class="text-[11px] text-slate-400">Head Sports Director: Rakesh Budhwar &bull; Youth Training Center</p>
+          <p class="text-[10px] text-slate-500 font-mono mt-0.5">GST Reg: 07AABCU9603R1ZX</p>
+        </div>
+
+        <div class="flex justify-between text-xs">
+          <div>
+            <span class="text-slate-400 block text-[10px] uppercase">Receipt No:</span>
+            <span id="receiptNumberDisplay" class="font-mono font-bold text-electric-400">REC-2026-001</span>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 block text-[10px] uppercase">Payment Date:</span>
+            <span id="receiptDateDisplay" class="font-medium text-white">21 Oct 2026</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-navy-950 border border-slate-800 space-y-1">
+          <div class="flex justify-between"><span class="text-slate-400">Student Name:</span><span id="receiptStudentName" class="font-bold text-white">Aarav Sharma</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Reg Number:</span><span id="receiptRegNumber" class="font-mono text-slate-300">DSO2026001</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Activity & Batch:</span><span id="receiptActivity" class="text-slate-300">Yoga (5–6 PM)</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Fee Cycle Month:</span><span id="receiptMonth" class="text-slate-300">October 2026</span></div>
+        </div>
+
+        <table class="w-full text-left text-xs border-y border-slate-800 my-2">
+          <thead>
+            <tr class="text-slate-400 border-b border-slate-800/80">
+              <th class="py-2">Item Description</th>
+              <th class="py-2 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="py-2 text-slate-300">Standard Monthly Sports Training Fee</td>
+              <td class="py-2 text-right font-medium">₹2,000.00</td>
+            </tr>
+            <tr>
+              <td class="py-2 text-slate-300">Amount Paid</td>
+              <td class="py-2 text-right font-bold text-emerald-400" id="receiptPaidDisplay">₹2,000.00</td>
+            </tr>
+            <tr class="border-t border-slate-800">
+              <td class="py-2 font-bold text-white">Balance Due</td>
+              <td class="py-2 text-right font-bold text-red-400" id="receiptBalanceDisplay">₹0.00</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="flex justify-between items-center text-[10px] text-slate-400 pt-2">
+          <span>Payment Mode: <strong id="receiptMethodDisplay" class="text-slate-200">UPI</strong></span>
+          <span class="italic text-slate-500">Computer Generated Receipt &bull; Approved by Rakesh Budhwar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Media Lightbox Modal -->
+  <div id="mediaLightboxModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-3xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl relative">
+      <button onclick="closeModal('mediaLightboxModal')" class="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-white rounded-full bg-navy-950/80">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div id="lightboxMediaContent" class="h-96 w-full flex items-center justify-center overflow-hidden bg-black"></div>
+      <div class="p-5 bg-navy-900 border-t border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 id="lightboxMediaTitle" class="text-sm font-bold text-white heading-font">--</h3>
+          <p id="lightboxMediaSubtitle" class="text-xs text-slate-400">DSO Sports Organisation Official Media Archive</p>
+        </div>
+        <span id="lightboxMediaTag" class="text-xs px-2.5 py-1 rounded-full bg-electric-500/20 text-electric-400 font-bold">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-navy-900 border border-electric-500 text-white shadow-2xl transition-all duration-300 transform translate-y-24 opacity-0 pointer-events-none">
+    <div class="w-8 h-8 rounded-xl bg-electric-500/20 text-electric-400 flex items-center justify-center">
+      <i data-lucide="check-circle" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMsg" class="text-xs font-semibold">Action completed successfully</span>
+  </div>
+
+  <!-- Custom Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

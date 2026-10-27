@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Share+Tech+Mono&display=swap');
+
+/* =========================================================
+   DSO SPORTS ORGANISATION – ULTRA-MODERN LOVABLE DESIGN SYSTEM
+   ========================================================= */
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: #060B18;
+  color: #E2E8F0;
+  overflow-x: hidden;
+}
+
+.heading-font {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.mono-font {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: rgba(17, 28, 61, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-subtle {
+  background: rgba(28, 37, 65, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 16px 32px -10px rgba(0, 168, 255, 0.2);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B132B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A375E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00A8FF;
+}
+
+/* Active Sidebar Navigation Item */
+.menu-active {
+  background: linear-gradient(90deg, rgba(0, 168, 255, 0.22) 0%, rgba(0, 168, 255, 0.04) 100%) !important;
+  border-left: 4px solid #00A8FF !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.menu-active i, .menu-active [data-lucide] {
+  color: #38BDF8 !important;
+  transform: scale(1.1);
+}
+
+/* Status Badges */
+.badge-paid {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-pending {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-partial {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-electric {
+  background: rgba(0, 168, 255, 0.15);
+  color: #38BDF8;
+  border: 1px solid rgba(0, 168, 255, 0.3);
+}
+
+.badge-gold {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Gallery & Activity Cards */
+.media-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.media-card:hover img {
+  transform: scale(1.08);
+}
+
+.media-card:hover .media-overlay {
+  opacity: 1;
+}
+
+/* Print Invoice Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableReceipt, #printableReceipt * {
+    visibility: visible;
+  }
+  #printableReceipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+  }
+}
